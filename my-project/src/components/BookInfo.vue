@@ -73,6 +73,7 @@ export default {
         p{
             text-indent: 2em;
             font-size: 14px;
+            padding: 10px;
         }
     }
     .right{
