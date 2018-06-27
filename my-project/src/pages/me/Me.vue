@@ -4,6 +4,7 @@
 			<img :src="userinfo.avatarUrl" alt="">
 			<p>{{userinfo.nickName}}</p>
 		</div>
+      <button v-if="firstLogin" open-type="getUserInfo" @getuserinfo="getuserinfo">用户登陆</button>
 		<YearProgress></YearProgress>
 		<button v-if="userinfo.openId" @click="scanBook" class="btn">添加图书</button>
 	</div>
@@ -21,8 +22,9 @@ export default {
     return {
       userinfo: {
         avatarUrl: '../../../static/img/unlogin.png',
-        nickName: '点击登录'
-      }
+        nickName: '用户姓名'
+      },
+      firstLogin: false
     }
   },
   created () {
@@ -48,6 +50,9 @@ export default {
         }
       })
     },
+    getuserinfo (e) {
+      console.log(e.mp.detail)
+    },
     login () {
       let user = wx.getStorageSync('userinfo')
       if (!user) {
@@ -61,6 +66,7 @@ export default {
           },
           fail: (err) => {
             console.log('登录失败', err)
+            this.firstLogin = true
           }
         })
       }
