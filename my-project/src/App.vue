@@ -15,6 +15,15 @@ export default{
   .text-primary{
     color: #EA5149;
   }
+  .right{
+    float: right;
+  }
+  .page-title{
+    padding-left: 20px;
+    background: #eee;
+    line-height: 40px;
+    font-size: 14px;
+  }
   .btn{
     color: white;
     background: #EA5149;

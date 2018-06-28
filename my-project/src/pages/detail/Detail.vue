@@ -1,13 +1,14 @@
 <template>
 	<div>
     <BookInfo :info="info"></BookInfo>
-    <div class="commet">
+    <CommentList :comments="comments"></CommentList>
+    <div class="comment" v-if="showAdd">
       <textarea v-model="comment" 
                 class="textarea"
                 :maxlength="100"
                 placeholder="请输入图书评论"
                 ></textarea>
-    </div>
+    
     <div class="location">
       地理位置
       <switch color="#EA5A49" @change="getGeo"></switch>
@@ -21,14 +22,21 @@
     <button class="btn" @click="addComment">
       评论
     </button>
+    </div>
+    <div class="text-footer" v-else>
+      未登录或者已经评论过了
+    </div>
+    <button class="btn" open-type="share">转发给好友</button>
 	</div>
 </template>
 <script>
 import {get, post, showModal} from '@/utils'
 import BookInfo from '@/components/BookInfo'
+import CommentList from '@/components/CommentList'
 export default {
   components: {
-    BookInfo
+    BookInfo,
+    CommentList
   },
   data () {
     return {
@@ -37,7 +45,19 @@ export default {
       info: {},
       comment: '',
       location: '',
-      phone: ''
+      phone: '',
+      userinfo: {}
+    }
+  },
+  computed: {
+    showAdd () {
+      if (!this.userinfo.openId) {
+        return false
+      }
+      if (this.comments.filter(v => v.openid === this.userinfo.openId).length) {
+        return false
+      }
+      return true
     }
   },
   mounted () {
@@ -46,7 +66,12 @@ export default {
     this.getComments()
     const userinfo = wx.getStorageSync('userinfo')
     if (userinfo) {
-      this.userinfo = userinfo
+      this.userinfo = userinfo || {}
+    }
+  },
+  onShareAppMessage () {
+    return {
+      title: '书籍详情'
     }
   },
   methods: {
@@ -64,6 +89,7 @@ export default {
       try {
         await post('/weapp/addcomment', data)
         this.comment = ''
+        this.getComments()
       } catch (e) {
         showModal('失败', e.msg)
       }
@@ -71,7 +97,7 @@ export default {
     },
     async getComments () {
       const comments = await get('/weapp/commentlist', {bookid: this.id})
-      this.comments = comments
+      this.comments = comments.list || []
     },
     async getDetail () {
       const info = await get('/weapp/bookdetail', {id: this.id})
